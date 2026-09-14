@@ -309,6 +309,8 @@ function shuffleInPlace(arr) {
 
 /**
  * Грубый POS-фильтр по позиции слова в строке (подобие оригинального диспетчера).
+ * Также блокирует «частицы» в последнем слоте строки — "не", "но", "и" в конце
+ * строки убивают рифму (у них уникальный rhyme-ключ, рифмоваться не с чем).
  */
 function passesPosFilter(words) {
   if (words.length === 0) return false;
@@ -316,6 +318,7 @@ function passesPosFilter(words) {
     const p = words[0].pos || '';
     if (p === '?' || p === '') return false;
   }
+  // После прилагательного должно идти существительное
   for (let i = 0; i < words.length - 1; i++) {
     const p = (words[i].pos || '').trim();
     if (p.startsWith('A')) {
@@ -323,6 +326,11 @@ function passesPosFilter(words) {
       if (next !== 'N' && next !== 'AV') return false;
     }
   }
+  // Последнее слово не должно быть частицей или 1-слоговым наречием
+  // (иначе рифмовать строку не с чем — у частиц уникальный rhyme-ключ)
+  const last = words[words.length - 1];
+  const lastPos = (last.pos || '').trim();
+  if (lastPos === '' || lastPos === '?') return false;
   return true;
 }
 
@@ -361,24 +369,36 @@ function compose(dict, spec) {
   }
 
   // ====== Проход 1: выбрать рифменный якорь для группы ======
-  // Якорь = rhyme-ключ последнего слова самой длинной строки группы
-  // (её словарь богаче выбора, и общая рифма становится «базой»).
-  // Если в группе есть строки одинакового размера — берём первую.
+  // Берём rhyme-ключ, который МОЖНО встретить как последнее слово в КАЖДОЙ
+  // строке группы. Если такого нет — берём самый частый. Если и такого нет —
+  // null (тогда рифма не навязывается, генерация идёт свободно).
   const groupAnchor = new Map();
   for (const [letter, lineIdxs] of rhymeGroups) {
     if (lineIdxs.length <= 1) continue;
-    // отсортируем индексы по убыванию длины шаблона
-    const sorted = [...lineIdxs].sort((a, b) => lines[b].stress.length - lines[a].stress.length);
-    let anchor = null;
-    for (const idx of sorted) {
-      const decs = findDecompositions(lines[idx].stress, indexByStress, { cap: 80 })
+
+    // Для каждой строки группы — множество rhyme-ключей её последних слов
+    const keysByLine = lineIdxs.map(idx => {
+      const decs = findDecompositions(lines[idx].stress, indexByStress, { cap: 60 })
                     .filter(passesPosFilter);
-      if (decs.length > 0) {
-        // Берём рифму последнего слова СЛУЧАЙНО выбранного варианта
-        const pick = decs[Math.floor(rng() % decs.length)];
-        const lastWord = pick[pick.length - 1];
-        anchor = lastWord.rhyme;
-        break;
+      const keys = new Set();
+      for (const d of decs) if (d.length > 0) keys.add(d[d.length - 1].rhyme);
+      return keys;
+    });
+
+    // 1) Пересечение — ключи, доступные ВСЕМ строкам группы
+    const intersection = [...keysByLine[0]].filter(k => keysByLine.every(ks => ks.has(k)));
+    let anchor = null;
+    if (intersection.length > 0) {
+      anchor = intersection[Math.floor(rng() % intersection.length)];
+    } else {
+      // 2) Самый частый (по числу строк, где встречается)
+      const lineCount = new Map();
+      for (const ks of keysByLine) {
+        for (const k of ks) lineCount.set(k, (lineCount.get(k) || 0) + 1);
+      }
+      const sorted = [...lineCount.entries()].sort((a, b) => b[1] - a[1]);
+      if (sorted.length > 0 && sorted[0][1] >= 2) {
+        anchor = sorted[0][0];
       }
     }
     if (anchor) groupAnchor.set(letter, anchor);
