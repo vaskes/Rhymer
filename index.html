@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>СТИХОПЛЮЙ v4.0 — клон для браузера</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>СТИХОПЛЮЙ v4.0</h1>
+  <p class="subtitle">клон одноимённой программы GrinchSoft, 1991 · для браузера, 2026</p>
+  <pre class="orig-banner">       `СТИХОПЛЮЙ V4.0 - GrinchSoft (C), 1991.` Распространяется свободно.</pre>
+</header>
+
+<section id="credits" class="orig-text">
+  <details>
+    <summary>Оригинальное обращение автора (сохранено без изменений)</summary>
+    <pre>╔══════╤════════════════════╤═════╦════════════════════════════════════════════╗
+║строка│     р а з м е р    │рифма║ словарь:                                   ║
+╟──────┼────────────────────┼─────╢ вывод в:                                   ║
+║   1  │                    │     ╠════════════════════════════════════════════╝
+║   2  │                    │     ║┌───────────────────────────────────────────┐
+║   3  │                    │     ║│ `F3`  - запомнить строку                   │
+║   4  │                    │     ║│ `F4`  - вспомнить строку                   │
+║   5  │                    │     ║│ `F5`  - сохранить режимы                   │
+║   6  │                    │     ║│ `F6`  - прочесть режимы из файла           │
+║   7  │                    │     ║│ `F7`  - вставить строку                    │
+║   8  │                    │     ║│ `F8`  - удалить строку                     │
+║   9  │                    │     ║│ `F9`  - сочинить стишок                    │
+║  10  │                    │     ║│ `F10` - выход                              │
+║  11  │                    │     ║├───────────────────────────────────────────┤
+║  12  │                    │     ║│                                           │
+║  13  │                    │     ║│                                           │
+║  14  │                    │     ║│                                           │
+║  15  │                    │     ║├───────────────────────────────────────────┤
+║  16  │                    │     ║│Если Вам понравилась эта программа, Вы мо- │
+║  17  │                    │     ║│жете выслать 5 руб. по адресу: 141740, до  │
+║  18  │                    │     ║│востребования, Гринчуку Михаилу Ивановичу. │
+║  19  │                    │     ║│Просьба также сообщать о случаях публикации│
+║  20  │                    │     ║│созданных с помощью этой программы текстов.│
+╚══════╧════════════════════╧═════╝└───────────────────────────────────────────┘</pre>
+    <p class="orig-text-ps">— Оригинальный текст © Михаил Иванович Гринчук, 1991. Сохранён без изменений в целях атрибуции.</p>
+  </details>
+</section>
+
+<section id="files">
+  <div class="file-block">
+    <label for="dictFile">Словарь (rhymer.dat):</label>
+    <span id="dictName" class="file-name">rhymer.dat</span>
+    <input type="file" id="dictFile" accept=".dat,.txt">
+  </div>
+  <div class="file-block">
+    <label for="cfgFile">Конфиг (rhymer.cfg):</label>
+    <span id="cfgName" class="file-name">onegin.cfg</span>
+    <input type="file" id="cfgFile" accept=".cfg,.txt">
+  </div>
+  <div class="file-block">
+    <label for="outFile">Файл вывода:</label>
+    <input type="text" id="outFile" value="rhymer.out">
+    <button id="dlBtn" disabled>скачать</button>
+  </div>
+</section>
+
+<section id="stanza">
+  <h2>Строфа (до 14 строк, как в оригинале)</h2>
+  <p class="hint">
+    Поле «размер»: знак <code>-</code> = безударный слог, <code>'</code> = ударный.
+    В строке должен быть хотя бы один ударный слог.<br>
+    Поле «рифма»: буквы для обозначения рифмующихся строк (a, b, c…).
+    У рифмующихся строк должно совпадать число безударных слогов <em>после последнего ударного</em>.
+  </p>
+
+  <div class="presets">
+    <label for="presetSelect">Пресет размера и рифмы:</label>
+    <select id="presetSelect">
+      <option value="">— выбрать пресет —</option>
+      <optgroup label="Четверостишия (4 строки)">
+        <option value="iamb4m-abab">Ямб 4-стопный, мужское окончание, ABAB (8 слогов)</option>
+        <option value="iamb4f-abab">Ямб 4-стопный, женское окончание, ABAB (9 слогов)</option>
+        <option value="iamb4f-aabb">Ямб 4-стопный, женское окончание, AABB</option>
+        <option value="iamb3mix-abab">Ямб 3-стопный, чередование окончаний (7/6 слогов), ABAB</option>
+        <option value="iamb3f-abab">Ямб 3-стопный, женское окончание, ABAB (7 слогов)</option>
+        <option value="trochee4f-abab">Хорей 4-стопный, женское окончание, ABAB (8 слогов)</option>
+        <option value="trochee3m-abab">Хорей 3-стопный, мужское окончание, ABAB (6 слогов)</option>
+        <option value="dactyl2m-abab">Дактиль 2-стопный, мужское окончание, ABAB (6 слогов)</option>
+        <option value="anapest2m-abab">Анапест 2-стопный, мужское окончание, ABAB (6 слогов)</option>
+        <option value="amphibrach3m-abab">Амфибрахий 3-стопный, мужское окончание, ABAB (9 слогов)</option>
+      </optgroup>
+      <optgroup label="Классические стансы">
+        <option value="onegin">Онегинская строфа (14 строк, как в RHYMER.CFG)</option>
+        <option value="sonnet">Сонет: 2 катрена + 2 терцета (14 строк)</option>
+        <option value="sestina">Шестистишие (6 строк, 6-стопный ямб)</option>
+      </optgroup>
+      <optgroup label="Свободная форма">
+        <option value="clear">Очистить (пустая строфа)</option>
+      </optgroup>
+    </select>
+    <button id="applyPresetBtn">применить</button>
+  </div>
+
+  <table id="linesTable">
+    <thead>
+      <tr><th>№</th><th>размер</th><th>рифма</th><th>пропустить</th><th></th></tr>
+    </thead>
+    <tbody id="linesBody"></tbody>
+  </table>
+  <div class="row-buttons">
+    <button id="addBtn">+ строка</button>
+    <button id="remBtn">− строка</button>
+    <button id="composeBtn" disabled>сочинить (F9)</button>
+    <button id="saveModeBtn">сохранить режим (F5)</button>
+    <button id="loadModeBtn" disabled>загрузить режим (F6)</button>
+    <button id="rememberBtn">запомнить строку (F3)</button>
+    <button id="recallBtn">вспомнить строку (F4)</button>
+  </div>
+</section>
+
+<section id="output">
+  <h2>Сгенерированное</h2>
+  <pre id="outputPre">— пусто —</pre>
+</section>
+
+<section id="legend">
+  <details>
+    <summary>формат словаря (.dat)</summary>
+    <p>Одна запись на строку (CRLF), кодировка CP866:</p>
+    <ul>
+      <li><b>1–25</b> — слово (или словосочетание), по левому краю, пробелы справа.</li>
+      <li><b>26–35</b> — схема ударений (10 знаков): <code>-</code> безударный, <code>'</code> ударный.</li>
+      <li><b>36–40</b> — ключ рифмы (5 знаков, одинаковый у рифмующихся слов).</li>
+      <li><b>41–42</b> — часть речи: <code>N</code> сущ., <code>A</code> прил., <code>AV</code> причастие, <code>VН</code> гл. наст., <code>VП</code> гл. прош., <code>?V</code> деепричастие, <code>?</code> наречие, пусто — прочее.</li>
+    </ul>
+    <p>Файл — текстовый, итого запись обычно 41–42 байта.</p>
+  </details>
+  <details>
+    <summary>формат конфига (.cfg)</summary>
+    <p>Одна строка (CP866) фиксированной ширины:</p>
+    <ul>
+      <li><b>1–20</b> — имя файла словаря.</li>
+      <li><b>21–40</b> — имя файла ресурсов.</li>
+      <li>далее для каждой строки строфы поле по 25 знаков: в начале — шаблон ударений, последний знак (не пробел) — буква рифмы.</li>
+    </ul>
+  </details>
+</section>
+
+<script src="stihoplyui.js?v=6"></script>
+</body>
+</html>

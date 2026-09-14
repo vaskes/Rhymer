@@ -1,0 +1,4 @@
+# Не версионируем упакованный архив
+stihoplyui-clone.zip
+*.zip
+.DS_Store
